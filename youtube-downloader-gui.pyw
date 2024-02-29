@@ -7,14 +7,20 @@ from pytube import Playlist, YouTube
 class DownloadThread(QThread):
     progress_update = pyqtSignal(str)
 
-    def __init__(self, playlist_url, parent=None):
+    def __init__(self, url, parent=None):
         super().__init__(parent)
-        self.playlist_url = playlist_url
+        self.url = url
         self.running = True
         self.paused = False
 
     def run(self):
-        pl = Playlist(self.playlist_url)
+        if "playlist" in self.url:
+            self.download_playlist()
+        else:
+            self.download_video()
+
+    def download_playlist(self):
+        pl = Playlist(self.url)
         playlist_title = pl.title
         folder_name = f"Videos/{playlist_title}"
         os.makedirs(folder_name, exist_ok=True)
@@ -27,7 +33,7 @@ class DownloadThread(QThread):
             yt = YouTube(video_url)
             video = yt.streams.filter(progressive=True, file_extension="mp4").order_by("resolution").desc().first()
             if video:
-                video_title = f"{i:02d} - {yt.title}.mp4"  # Add '.mp4' extension
+                video_title = f"{i:02d} - {yt.title}.mp4"
                 video_title = video_title.replace('/', '_')
                 self.progress_update.emit(f"Downloading video {i}: '{yt.title}'...")
                 video.download(folder_name, filename=video_title)
@@ -38,6 +44,18 @@ class DownloadThread(QThread):
                 if not self.running:
                     break
                 self.sleep(1)
+
+    def download_video(self):
+        yt = YouTube(self.url)
+        video = yt.streams.filter(progressive=True, file_extension="mp4").order_by("resolution").desc().first()
+        if video:
+            video_title = f"{yt.title}.mp4"
+            video_title = video_title.replace('/', '_')
+            self.progress_update.emit(f"Downloading video: '{yt.title}'...")
+            video.download("Videos", filename=video_title)
+            self.progress_update.emit(f"Video '{yt.title}' downloaded successfully in the highest resolution available: {video.resolution}")
+        else:
+            self.progress_update.emit(f"Video '{yt.title}' could not be downloaded")
 
     def stop(self):
         self.running = False
@@ -54,10 +72,10 @@ class MainWindow(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        self.setWindowTitle("YouTube Playlist Downloader")
+        self.setWindowTitle("YouTube Downloader")
         layout = QVBoxLayout()
 
-        self.url_label = QLabel("Playlist URL:")
+        self.url_label = QLabel("URL:")
         self.url_input = QLineEdit()
         layout.addWidget(self.url_label)
         layout.addWidget(self.url_input)
@@ -82,16 +100,16 @@ class MainWindow(QWidget):
         self.setLayout(layout)
 
     def start_download(self):
-        playlist_url = self.url_input.text().strip()
-        if playlist_url:
+        url = self.url_input.text().strip()
+        if url:
             self.log_output.clear()
-            self.download_thread = DownloadThread(playlist_url)
+            self.download_thread = DownloadThread(url)
             self.download_thread.progress_update.connect(self.update_progress)
             self.download_thread.start()
             self.download_button.setEnabled(False)
             self.pause_button.setEnabled(True)
         else:
-            self.log_output.append("Please enter a playlist URL.")
+            self.log_output.append("Please enter a URL.")
 
     def pause_download(self):
         if hasattr(self, 'download_thread'):
