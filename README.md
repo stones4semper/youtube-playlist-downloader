@@ -1,4 +1,4 @@
-<h2>its just a simple script to help you download youtube videos and also the entire video in a playlist</h2>
+<h2>Its just a simple script to help you download youtube videos and also the entire video in a playlist</h2>
 
 Its also automtically create a directory with the playlist name and also appends the index of the video to the video names
 
