@@ -20,7 +20,7 @@ class DownloadThread(QThread):
             self.download_video(self.url)
 
     def is_playlist(self, url):
-        return 'playlist' in url.lower()
+        return 'list' in url.lower()
 
     def download_playlist(self, url):
         pl = Playlist(url)
@@ -32,7 +32,7 @@ class DownloadThread(QThread):
             if not self.running:
                 break
             yt = YouTube(video_url)
-            video = yt.streams.filter(progressive=True, file_extension="mp4").order_by("resolution").desc().first()
+            video = yt.streams.filter(progressive=True, file_extension="mp4").order_by("resolution").asc().first()
             if video:
                 video_title = f"{i:02d} - {yt.title}.mp4"
                 video_title = video_title.replace('/', '_')
@@ -48,7 +48,7 @@ class DownloadThread(QThread):
 
     def download_video(self, url):
         yt = YouTube(url)
-        video = yt.streams.filter(progressive=True, file_extension="mp4").order_by("resolution").desc().first()
+        video = yt.streams.filter(progressive=True, file_extension="mp4").order_by("resolution").asc().first()
         if video:
             video_title = f"{yt.title}.mp4"
             video_title = video_title.replace('/', '_')
@@ -95,6 +95,11 @@ class MainWindow(QWidget):
         self.resume_button.setEnabled(False)
         layout.addWidget(self.resume_button)
 
+        self.stop_button = QPushButton("Stop")
+        self.stop_button.clicked.connect(self.stop_download)
+        self.stop_button.setEnabled(False)  # Disable initially
+        layout.addWidget(self.stop_button)
+
         self.log_output = QTextEdit()
         layout.addWidget(self.log_output)
 
@@ -109,6 +114,7 @@ class MainWindow(QWidget):
             self.download_thread.start()
             self.download_button.setEnabled(False)
             self.pause_button.setEnabled(True)
+            self.stop_button.setEnabled(True)  # Enable stop button
         else:
             self.log_output.append("Please enter a URL.")
 
@@ -123,6 +129,14 @@ class MainWindow(QWidget):
             self.download_thread.resume()
             self.resume_button.setEnabled(False)
             self.pause_button.setEnabled(True)
+
+    def stop_download(self):
+        if hasattr(self, 'download_thread'):
+            self.download_thread.stop()
+            self.download_button.setEnabled(True)
+            self.pause_button.setEnabled(False)
+            self.resume_button.setEnabled(False)
+            self.stop_button.setEnabled(False)
 
     def update_progress(self, message):
         self.log_output.append(message)
