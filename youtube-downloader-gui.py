@@ -32,7 +32,7 @@ class DownloadThread(QThread):
             if not self.running:
                 break
             yt = YouTube(video_url)
-            video = yt.streams.filter(progressive=True, file_extension="mp4").order_by("resolution").asc().first()
+            video = yt.streams.filter(progressive=True, file_extension="mp4").order_by("resolution").desc().first()
             if video:
                 video_title = f"{i:02d} - {yt.title}.mp4"
                 video_title = video_title.replace('/', '_')
@@ -48,7 +48,7 @@ class DownloadThread(QThread):
 
     def download_video(self, url):
         yt = YouTube(url)
-        video = yt.streams.filter(progressive=True, file_extension="mp4").order_by("resolution").asc().first()
+        video = yt.streams.filter(progressive=True, file_extension="mp4").order_by("resolution").desc().first()
         if video:
             video_title = f"{yt.title}.mp4"
             video_title = video_title.replace('/', '_')
