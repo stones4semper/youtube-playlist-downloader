@@ -20,7 +20,7 @@ for video_url in pl.video_urls:
     yt = YouTube(video_url)
     video = yt.streams.filter(progressive=True, file_extension="mp4").order_by("resolution").desc().first()
     if video:
-        video_title = f"{i:02d} - {yt.title}"
+        video_title = f"{i:02d} - {yt.title}.mp4" 
         video_title = video_title.replace('/', '_')
         video.register_on_progress_callback(show_progress)
         video.download(folder_name, filename=video_title)
