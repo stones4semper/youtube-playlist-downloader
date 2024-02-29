@@ -2,6 +2,28 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import { Video } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
+import axios from 'axios';
+
+const API_KEY = 'YOUR_YOUTUBE_API_KEY';
+
+const fetchVideosFromPlaylist = async (playlistUrl) => {
+  try {
+    const playlistId = playlistUrl.split('list=')[1];
+
+    const response = await axios.get(
+      `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistId}&key=${API_KEY}`
+    );
+
+    const videoIds = response.data.items.map((item) => item.snippet.resourceId.videoId);
+
+    const videoUrls = videoIds.map((videoId) => `https://www.youtube.com/watch?v=${videoId}`);
+
+    return videoUrls;
+  } catch (error) {
+    console.error('Error fetching videos from playlist:', error);
+    throw error;
+  }
+};
 
 const VideoDownloader = () => {
   const [playlistUrl, setPlaylistUrl] = useState('');
@@ -27,22 +49,7 @@ const VideoDownloader = () => {
       console.error('Error downloading video:', error);
     }
   };
-  const fetchVideosFromPlaylist = async (playlistUrl) => {
-    try {
-      const playlistId = playlistUrl.split('list=')[1];
-      const apiKey = 'YOUR_YOUTUBE_API_KEY';
-      const apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&key=${apiKey}`;
-      const response = await fetch(apiUrl);
-      const data = await response.json();
-      const videoIds = data.items.map(item => item.snippet.resourceId.videoId);  
-      const videoUrls = videoIds.map(videoId => `https://www.youtube.com/watch?v=${videoId}`);
-  
-      return videoUrls;
-    } catch (error) {
-      console.error('Error fetching videos from playlist:', error);
-      return [];
-    }
-  };
+
   const handleDownload = async () => {
     try {
       setDownloading(true);
