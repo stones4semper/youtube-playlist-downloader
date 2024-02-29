@@ -1,4 +1,4 @@
-its just a simple script to help you download youtube videos and also the entire video in a playlist
+<h2>its just a simple script to help you download youtube videos and also the entire video in a playlist</h2>
 
 Its also automtically create a directory with the playlist name and also appends the index of the video to the video names
 
@@ -9,17 +9,17 @@ Like i may want to download videos from  different channels or even from the sam
 It also downloads single videos 
 
 Install the following  packages before running youtube-downloader.py script:
-<b>- pytube (pip install pytube)</b>
+<h4>- pytube (pip install pytube)</h4>
 
 Install the following  packages before running youtube-downloader-gui.py script:
-- pytube (pip install pytube)
-- PyQt5 (pip install PyQt5) 
+<h4>- pytube (pip install pytube)</h4>
+<h4>- PyQt5 (pip install PyQt5) </h4>
 
 it also contains script for downloading facebook, tiktok videos
 
 Install the following  packages before running yt-fb-tiktok-downloader-gui.py script:
-- pytube (pip install pytube)
-- PyQt5 (pip install PyQt5) # for the gui version
-- TikTokApi (pip install TikTokApi) # for the gui version
-- facebook_scraper (pip install facebook_scraper) # for the gui version
+<h4>- pytube (pip install pytube)</h4>
+<h4>- PyQt5 (pip install PyQt5)</h4>
+<h4>- TikTokApi (pip install TikTokApi)</h4>
+<h4>- facebook_scraper (pip install facebook_scraper)</h4>
 
