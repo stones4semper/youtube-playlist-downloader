@@ -14,49 +14,62 @@ class DownloadThread(QThread):
         self.paused = False
 
     def run(self):
-        if self.is_playlist(self.url):
-            self.download_playlist(self.url)
-        else:
-            self.download_video(self.url)
+        try:
+            if self.is_playlist(self.url):
+                self.download_playlist(self.url)
+            else:
+                self.download_video(self.url)
+        except Exception as e:
+            self.progress_update.emit(f"An error occurred: {str(e)}")
 
     def is_playlist(self, url):
         return 'list' in url.lower()
 
     def download_playlist(self, url):
-        pl = Playlist(url)
-        playlist_title = pl.title
-        folder_name = f"Videos/{playlist_title}"
-        os.makedirs(folder_name, exist_ok=True)
+        try:
+            pl = Playlist(url)
+            playlist_title = pl.title
+            playlist_title = "".join(c if c.isalnum() or c in [' ', '_', '-'] else '_' for c in playlist_title)
+            folder_name = os.path.join("Videos", playlist_title)
+            os.makedirs(folder_name, exist_ok=True)
 
-        for i, video_url in enumerate(pl.video_urls, start=1):
-            if not self.running:
-                break
-            yt = YouTube(video_url)
-            video = yt.streams.filter(progressive=True, file_extension="mp4").order_by("resolution").desc().first()
-            if video:
-                video_title = f"{i:02d} - {yt.title}.mp4"
-                video_title = video_title.replace('/', '_')
-                self.progress_update.emit(f"Downloading video {i}: '{yt.title}'...")
-                video.download(folder_name, filename=video_title)
-                self.progress_update.emit(f"Video {i}: '{yt.title}' downloaded successfully in the highest resolution available playlisy: {video.resolution}")
-            else:
-                self.progress_update.emit(f"Video {i}: '{yt.title}' could not be downloaded")
-            while self.paused:
+            for i, video_url in enumerate(pl.video_urls, start=1):
                 if not self.running:
                     break
-                self.sleep(1)
+                try:
+                    yt = YouTube(video_url)
+                    video = yt.streams.filter(progressive=True, file_extension="mp4").order_by("resolution").desc().first()
+                    if video:
+                        video_title = f"{i:02d} - {yt.title}.mp4"
+                        video_title = "".join(c if c.isalnum() or c in [' ', '_', '-'] else '_' for c in video_title)
+                        self.progress_update.emit(f"Downloading playlist video {i}: '{yt.title}'...")
+                        video.download(folder_name, filename=video_title)
+                        self.progress_update.emit(f"Video {i}: '{yt.title}' downloaded successfully in the highest resolution available: {video.resolution}")
+                    else:
+                        self.progress_update.emit(f"Video {i}: '{yt.title}' could not be downloaded")
+                except Exception as e:
+                    self.progress_update.emit(f"An error occurred while downloading video {i}: {str(e)}")
+                while self.paused:
+                    if not self.running:
+                        break
+                    self.sleep(1)
+        except Exception as e:
+            self.progress_update.emit(f"An error occurred while downloading playlist: {str(e)}")
 
     def download_video(self, url):
-        yt = YouTube(url)
-        video = yt.streams.filter(progressive=True, file_extension="mp4").order_by("resolution").desc().first()
-        if video:
-            video_title = f"{yt.title}.mp4"
-            video_title = video_title.replace('/', '_')
-            self.progress_update.emit(f"Downloading video: '{yt.title}'...")
-            video.download("Videos", filename=video_title)
-            self.progress_update.emit(f"Video '{yt.title}' downloaded successfully in the highest resolution available: {video.resolution}")
-        else:
-            self.progress_update.emit(f"Video '{yt.title}' could not be downloaded")
+        try:
+            yt = YouTube(url)
+            video = yt.streams.filter(progressive=True, file_extension="mp4").order_by("resolution").desc().first()
+            if video:
+                video_title = f"{yt.title}.mp4"
+                video_title = "".join(c if c.isalnum() or c in [' ', '_', '-'] else '_' for c in video_title)
+                self.progress_update.emit(f"Downloading video: '{yt.title}'...")
+                video.download("Videos", filename=video_title)
+                self.progress_update.emit(f"Video '{yt.title}' downloaded successfully in the highest resolution available: {video.resolution}")
+            else:
+                self.progress_update.emit(f"Video '{yt.title}' could not be downloaded")
+        except Exception as e:
+            self.progress_update.emit(f"An error occurred while downloading video: {str(e)}")
 
     def stop(self):
         self.running = False
