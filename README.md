@@ -9,7 +9,7 @@ Like i may want to download videos from  different channels or even from the sam
 It also downloads single videos 
 
 Install the following  packages before running youtube-downloader.py script:
-- pytube (pip install pytube)
+<b>- pytube (pip install pytube)</b>
 
 Install the following  packages before running youtube-downloader-gui.py script:
 - pytube (pip install pytube)
