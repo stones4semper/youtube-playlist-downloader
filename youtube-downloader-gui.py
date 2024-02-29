@@ -110,7 +110,7 @@ class MainWindow(QWidget):
 
         self.stop_button = QPushButton("Stop")
         self.stop_button.clicked.connect(self.stop_download)
-        self.stop_button.setEnabled(False)  # Disable initially
+        self.stop_button.setEnabled(False) 
         layout.addWidget(self.stop_button)
 
         self.log_output = QTextEdit()
@@ -127,7 +127,7 @@ class MainWindow(QWidget):
             self.download_thread.start()
             self.download_button.setEnabled(False)
             self.pause_button.setEnabled(True)
-            self.stop_button.setEnabled(True)  # Enable stop button
+            self.stop_button.setEnabled(True)  
         else:
             self.log_output.append("Please enter a URL.")
 
